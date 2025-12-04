@@ -2,653 +2,343 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
-  <title>Subsidios por descanso médico – Falabella</title>
-  <meta name="theme-color" content="#C6D420" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subsidios Falabella - Validación Inteligente</title>
+  <meta name="theme-color" content="#008F39" />
 
-  <!-- jsPDF -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <style>
     /* ============================
-       PALETA FALABELLA (Brandbook)
+       VARIABLES & ESTILOS GENERALES
        ============================ */
     :root {
-      /* Verde Falabella principal */
-      --falabella-green: #c6d420;
-      /* Verde intermedio / oscuro */
-      --green-mid: #026826;
-      --green-dark: #013f16;
+      --color-primary: #bed000; /* Verde Lima Falabella */
+      --color-primary-dark: #a2b200;
+      --color-secondary: #004724; /* Verde oscuro */
+      --color-accent: #E10098; 
+      
+      --bg-body: #F0F2F5;
+      --bg-card: #FFFFFF;
+      --text-main: #1F2937;
+      --text-muted: #6B7280;
+      --border-color: #E5E7EB;
 
-      /* Magenta ofertas / llamados */
-      --magenta: #f73eab;
-
-      /* Apoyos neutros */
-      --bg-soft: #f3f4f6;
-      --card-bg: #ffffff;
-      --border: #e5e7eb;
-      --text-main: #111827;
-      --text-muted: #6b7280;
-
-      --radius-xl: 24px;
-      --radius-lg: 16px;
-      --radius-md: 10px;
-      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.14);
+      --radius-xl: 20px;
+      --radius-lg: 12px;
+      --radius-md: 8px;
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      
+      --font-family: 'Poppins', sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
+      font-family: var(--font-family);
+      background-color: var(--bg-body);
+      background-image: radial-gradient(#bed000 1px, transparent 1px);
+      background-size: 30px 30px;
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 16px;
-      background:
-        radial-gradient(circle at top left, #e0f2fe 0, transparent 45%),
-        radial-gradient(circle at top right, #d9f99d 0, transparent 55%),
-        var(--bg-soft);
+      padding: 20px;
     }
 
-    .app-shell {
+    @media (min-width: 800px) { body { align-items: center; } }
+    @media (max-width: 600px) { body { padding: 10px; } }
+
+    /* CONTENEDOR PRINCIPAL */
+    .app-container {
       width: 100%;
-      max-width: 980px;
-      background: rgba(255, 255, 255, 0.96);
+      max-width: 1000px;
+      background: var(--bg-card);
       border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-soft);
-      display: grid;
-      grid-template-columns: 8px minmax(0, 1fr);
+      box-shadow: var(--shadow-lg);
       overflow: hidden;
-      border: 1px solid rgba(148, 163, 184, 0.3);
-    }
-
-    /* Barra vertical tipo “f” de Falabella */
-    .brand-bar {
-      background: linear-gradient(
-        180deg,
-        var(--falabella-green),
-        var(--green-mid)
-      );
-    }
-
-    .app-main {
       display: flex;
       flex-direction: column;
+      position: relative;
+    }
+
+    .top-bar {
+      height: 6px;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
     }
 
     /* HEADER */
     .app-header {
-      background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
-      color: #fff;
-      padding: 16px 20px 14px;
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border-color);
       display: flex;
-      flex-wrap: wrap;
-      gap: 12px 24px;
+      justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
     }
 
-    .header-left {
-      flex: 1;
-      min-width: 220px;
-    }
-
-    .app-title {
+    .header-content h1 {
       margin: 0;
-      font-size: 1.35rem;
+      font-size: 1.4rem;
+      color: var(--color-secondary);
       font-weight: 700;
-      letter-spacing: 0.02em;
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .title-pill {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.2);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-    }
-
-    .app-subtitle {
-      margin: 4px 0 0;
-      font-size: 0.82rem;
-      opacity: 0.95;
-    }
-
-    .steps {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      font-size: 0.78rem;
-    }
-
-    .step-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 9px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.18);
-      white-space: nowrap;
-    }
-
-    .step-number {
-      width: 16px;
-      height: 16px;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--falabella-green);
-      color: #111827;
-      font-weight: 700;
-    }
-
-    /* CUERPO */
-    .app-body {
-      padding: 18px 18px 20px;
-      display: grid;
-      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.1fr);
-      gap: 16px;
-    }
-
-    @media (max-width: 860px) {
-      .app-body {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .panel {
-      background: var(--card-bg);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      padding: 14px 14px 16px;
-    }
-
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .panel-title {
-      font-size: 0.95rem;
-      font-weight: 600;
+    .logo-f {
+      background: var(--color-secondary);
+      color: var(--color-primary);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 8px;
-    }
-
-    .panel-badge {
-      width: 22px;
-      height: 22px;
-      border-radius: 999px;
-      background: rgba(198, 212, 32, 0.18);
-      color: var(--green-dark);
-      display: inline-flex;
-      align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
-      font-weight: 700;
+      font-size: 1.1rem;
+      font-weight: 800;
     }
 
-    .panel-subtext {
-      margin: 2px 0 0;
-      font-size: 0.78rem;
+    .header-content p {
+      margin: 4px 0 0 0;
       color: var(--text-muted);
+      font-size: 0.85rem;
     }
 
-    .badge {
-      display: inline-flex;
+    /* BODY GRID */
+    .app-body {
+      padding: 30px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 850px) { .app-body { grid-template-columns: 1fr; } }
+
+    /* FORM COMPONENTS */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      font-size: 0.72rem;
-      background: rgba(247, 62, 171, 0.12);
-      color: var(--magenta);
-    }
-
-    .badge-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 999px;
-      background: var(--magenta);
+      gap: 8px;
     }
 
     select {
       width: 100%;
-      padding: 10px 12px;
-      font-size: 0.9rem;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #f9fafb;
-      outline: none;
-      transition: box-shadow 0.15s, border-color 0.15s, background 0.15s;
+      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      font-family: inherit;
+      margin-bottom: 25px;
+      cursor: pointer;
     }
 
-    select:focus {
-      border-color: var(--falabella-green);
-      box-shadow: 0 0 0 1px rgba(198, 212, 32, 0.6);
-      background: #ffffff;
-    }
-
-    /* ZONAS */
+    /* UPLOAD CARDS */
     .zones-grid {
-      margin-top: 12px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
     }
 
-    .zone-card {
-      border-radius: var(--radius-md);
-      border: 1px dashed #d1d5db;
-      background: #f9fafb;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      position: relative;
-      transition: border-color 0.2s, box-shadow 0.2s, transform 0.1s,
-        background 0.2s;
-    }
-
-    .zone-card.completed {
-      border-style: solid;
-      border-color: var(--green-mid);
-      background: #ecfdf3;
-      box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.4);
-    }
-
-    .zone-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.78rem;
-    }
-
-    .zone-name {
-      font-weight: 600;
-      color: var(--green-dark);
-    }
-
-    .zone-status {
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 0.68rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .zone-status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: currentColor;
-    }
-
-    .zone-status.pending {
-      background: #fef2f2;
-      color: #b91c1c;
-    }
-
-    .zone-status.done {
-      background: #ecfdf5;
-      color: #15803d;
-    }
-
-    .drop-zone {
-      position: relative;
-      border-radius: 10px;
-      border: 1px dashed rgba(19, 78, 74, 0.3);
-      background: #e5f5d6;
-      padding: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 130px;
-      cursor: pointer;
+    .upload-card {
+      background: white;
+      border: 2px dashed #D1D5DB;
+      border-radius: var(--radius-lg);
       overflow: hidden;
-      transition: border-color 0.2s, background 0.2s, transform 0.08s;
+      transition: all 0.2s;
+      animation: fadeInUp 0.4s ease backwards;
     }
 
-    .drop-zone:hover {
-      border-color: var(--falabella-green);
-      background: #d9f99d;
-      transform: translateY(-1px);
-    }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    .drop-zone.dragover {
-      border-color: var(--magenta);
-      background: #ffe4f3;
-    }
+    .upload-card:hover { border-color: var(--color-secondary); background: #F9FAFB; }
+    .upload-card.completed { border-style: solid; border-color: var(--color-secondary); }
 
-    .drop-zone-content {
-      text-align: center;
-      color: #374151;
-      font-size: 0.8rem;
+    .upload-area {
+      height: 140px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      z-index: 1;
-    }
-
-    .drop-zone-icon {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.82);
-      display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 4px;
-      font-size: 1.1rem;
-    }
-
-    .drop-zone-hint {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-    }
-
-    .preview-img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .zone-subtitle {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      line-height: 1.35;
-    }
-
-    .zone-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 2px;
-    }
-
-    .link-button {
-      border: none;
-      background: none;
-      padding: 0;
-      font-size: 0.7rem;
-      color: var(--magenta);
-      text-decoration: underline;
       cursor: pointer;
-    }
-
-    input[type="file"] {
-      display: none;
-    }
-
-    /* PANEL DERECHA */
-    .info-list {
-      list-style: none;
-      padding-left: 0;
-      margin: 0;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .info-list li span.bullet {
-      display: inline-block;
-      width: 14px;
+      position: relative;
+      padding: 10px;
       text-align: center;
     }
 
-    .footer-actions {
-      margin-top: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .upload-icon { width: 32px; height: 32px; color: #9CA3AF; margin-bottom: 8px; }
+    .upload-label { font-size: 0.8rem; font-weight: 600; }
+    .upload-sub { font-size: 0.7rem; color: var(--text-muted); }
+
+    .card-footer-info {
+      background: #F9FAFB;
+      padding: 8px 12px;
+      border-top: 1px solid #F3F4F6;
+    }
+    .doc-name { font-size: 0.75rem; font-weight: 700; color: var(--color-secondary); display: block; }
+    .doc-desc { font-size: 0.65rem; color: var(--text-muted); display: block; }
+
+    /* PREVIEW & OVERLAYS */
+    .preview-img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+    
+    .success-badge {
+      position: absolute; top: 8px; right: 8px;
+      background: white; border-radius: 50%;
+      width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--color-secondary);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      z-index: 2;
     }
 
-    .primary-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 14px;
+    .edit-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0, 71, 36, 0.8);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; color: white; font-weight: 600; font-size: 0.85rem;
+      transition: opacity 0.2s; z-index: 3;
+    }
+    .upload-card.completed:hover .edit-overlay { opacity: 1; }
+
+    /* SIDEBAR */
+    .sidebar-card {
+      background: #F9FAFB;
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      position: sticky; top: 20px;
+    }
+
+    .info-list { padding: 0; list-style: none; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; }
+    .info-list li { margin-bottom: 8px; padding-left: 18px; position: relative; }
+    .info-list li::before { content: "•"; color: var(--color-secondary); position: absolute; left: 0; font-weight: bold; }
+
+    .btn-primary {
       width: 100%;
-      border-radius: 999px;
+      background: var(--color-secondary);
+      color: white;
       border: none;
-      background: linear-gradient(
-        135deg,
-        var(--falabella-green),
-        var(--green-mid)
-      );
-      color: #111827;
-      font-weight: 700;
-      font-size: 0.94rem;
+      padding: 14px;
+      border-radius: 50px;
+      font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 10px 24px rgba(2, 104, 38, 0.4);
-      transition: transform 0.08s, box-shadow 0.08s, opacity 0.1s;
+      display: flex; justify-content: center; align-items: center; gap: 8px;
+      box-shadow: 0 4px 10px rgba(0, 71, 36, 0.3);
+      transition: transform 0.1s;
     }
+    .btn-primary:disabled { background: #D1D5DB; box-shadow: none; cursor: not-allowed; }
+    .btn-primary:not(:disabled):active { transform: scale(0.98); }
 
-    .primary-btn:disabled {
-      opacity: 0.55;
-      box-shadow: none;
-      cursor: default;
+    /* LOADER (Spinner) */
+    .loader {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(0,0,0,0.1);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .primary-btn:not(:disabled):active {
-      transform: translateY(1px);
-      box-shadow: 0 4px 12px rgba(2, 104, 38, 0.45);
-    }
-
-    .primary-btn .spinner {
-      width: 14px;
-      height: 14px;
-      border-radius: 999px;
-      border: 2px solid rgba(17, 24, 39, 0.25);
-      border-top-color: #111827;
-      animation: spin 0.7s linear infinite;
-    }
-
-    .helper-text {
-      font-size: 0.74rem;
-      color: var(--text-muted);
-      text-align: center;
-      line-height: 1.4;
-    }
-
-    .helper-text strong {
-      color: var(--green-mid);
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <div class="brand-bar"></div>
 
-    <div class="app-main">
-      <!-- HEADER -->
-      <header class="app-header">
-        <div class="header-left">
-          <h1 class="app-title">
-            <span class="title-pill">F</span>
-            Subsidios por descanso médico
-          </h1>
-          <p class="app-subtitle">
-            Herramienta interna para colaboradores Falabella: captura los documentos del subsidio, combínalos en un PDF y súbelo a tu carpeta de gestión.
-          </p>
+  <div class="app-container">
+    <div class="top-bar"></div>
+    
+    <header class="app-header">
+      <div class="header-content">
+        <h1><div class="logo-f">F</div> Subsidios por Descanso Médico</h1>
+        <p>Validador inteligente de documentos y generador de PDF.</p>
+      </div>
+    </header>
+
+    <main class="app-body">
+      <section>
+        <div class="section-title">1. Selecciona el tipo de operación</div>
+        <select id="operation-select">
+          <option value="">Seleccione una opción...</option>
+          <option value="1">Subsidios clínica privada</option>
+          <option value="2">Subsidios hospital público</option>
+          <option value="3">Clínica privada (+15 días)</option>
+        </select>
+
+        <div id="dynamic-content" style="display: none;">
+          <div class="section-title">2. Documentos Requeridos</div>
+          <div class="zones-grid" id="zones-container"></div>
         </div>
-        <div class="steps">
-          <div class="step-pill">
-            <span class="step-number">1</span> Elige el tipo de subsidio
-          </div>
-          <div class="step-pill">
-            <span class="step-number">2</span> Sube / toma fotos
-          </div>
-          <div class="step-pill">
-            <span class="step-number">3</span> Genera el PDF y compártelo
-          </div>
+        
+        <div id="empty-state" style="text-align: center; padding: 40px; color: var(--text-muted); background: #F9FAFB; border-radius: 12px;">
+          Selecciona una operación para comenzar.
         </div>
-      </header>
+      </section>
 
-      <!-- CUERPO -->
-      <main class="app-body">
-        <!-- Panel izquierdo -->
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <div class="panel-title">
-                <span class="panel-badge">1</span>
-                Selecciona el tipo de operación
-              </div>
-              <p class="panel-subtext">
-                Esto define los documentos que tendrás que adjuntar.
-              </p>
-            </div>
-            <span class="badge">
-              <span class="badge-dot"></span> Obligatorio
-            </span>
-          </div>
-
-          <select id="operation-select">
-            <option value="">Seleccione un tipo de operación</option>
-            <option value="1">Subsidios clínica privada</option>
-            <option value="2">Subsidios hospital público</option>
-            <option value="3">Clínica privada (+15 días)</option>
-          </select>
-
-          <div style="margin-top: 14px;">
-            <div class="panel-header" style="margin-bottom: 8px;">
-              <div>
-                <div class="panel-title">
-                  <span class="panel-badge">2</span>
-                  Documentos requeridos
-                </div>
-                <p class="panel-subtext">
-                  Toca cada recuadro verde para subir una imagen o tomar una foto.
-                </p>
-              </div>
-            </div>
-
-            <div class="zones-grid" id="zones-container"></div>
-          </div>
-        </section>
-
-        <!-- Panel derecho -->
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <div class="panel-title">
-                <span class="panel-badge">ℹ</span>
-                Recomendaciones rápidas
-              </div>
-            </div>
-          </div>
-
+      <aside>
+        <div class="sidebar-card">
+          <div class="section-title">Instrucciones</div>
           <ul class="info-list">
-            <li><span class="bullet">•</span> Verifica que el texto se lea claramente (sin reflejos ni sombras fuertes).</li>
-            <li><span class="bullet">•</span> Incluye siempre el documento completo: encabezados, sellos, firmas y fechas.</li>
-            <li><span class="bullet">•</span> Puedes reemplazar una foto en cualquier momento con “Cambiar foto”.</li>
-            <li><span class="bullet">•</span> Una vez descargado el PDF, súbelo a <strong>Google Drive / carpeta de Subsidios</strong> según el flujo interno.</li>
+            <li>Sube fotos claras de cada documento.</li>
+            <li><strong>El sistema validará automáticamente</strong> si la imagen contiene texto legible.</li>
+            <li>Si la foto es borrosa, será rechazada.</li>
+            <li>Al terminar, genera el PDF.</li>
           </ul>
 
-          <div class="footer-actions">
-            <button id="generate-btn" class="primary-btn" disabled>
-              <span>Generar PDF combinado</span>
-            </button>
-            <p class="helper-text">
-              El botón se activará cuando todos los documentos estén
-              <strong>completos</strong> ✅.
-            </p>
-          </div>
-        </section>
-      </main>
-    </div>
+          <button id="generate-btn" class="btn-primary" disabled>
+            <span>Generar PDF</span>
+          </button>
+        </div>
+      </aside>
+    </main>
   </div>
 
-  <!-- Input de archivo oculto (para móvil / desktop) -->
-  <input type="file" id="hidden-file-input" accept="image/*" capture="environment" />
+  <input type="file" id="hidden-file-input" accept="image/*" capture="environment" style="display:none" />
 
   <script>
+    // --- REFERENCIAS DOM ---
     const operationSelect = document.getElementById("operation-select");
     const zonesContainer = document.getElementById("zones-container");
     const generateBtn = document.getElementById("generate-btn");
     const hiddenFileInput = document.getElementById("hidden-file-input");
+    const dynamicContent = document.getElementById("dynamic-content");
+    const emptyState = document.getElementById("empty-state");
 
-    // Configuración según tipo de operación
+    // --- CONFIGURACIÓN DE OPERACIONES ---
     const OPERATIONS = {
       "1": {
         label: "Subsidios_clinica_privada",
-        documents: [
-          {
-            name: "Certificado médico",
-            subtitle: "Certificado médico emitido por la clínica privada.",
-          },
-        ],
+        documents: [{ name: "Certificado Médico", subtitle: "Emitido por clínica privada." }]
       },
       "2": {
         label: "Subsidios_hospital_publico",
         documents: [
-          {
-            name: "Certificado médico",
-            subtitle: "Certificado médico emitido por el hospital público.",
-          },
-          {
-            name: "Comprobante",
-            subtitle: "Comprobante de atención o pago relacionado.",
-          },
-        ],
+          { name: "Certificado Médico", subtitle: "Emitido por hospital público." },
+          { name: "Comprobante", subtitle: "De atención o pago relacionado." }
+        ]
       },
       "3": {
         label: "Clinica_privada_+15_dias",
         documents: [
-          {
-            name: "Certificado médico",
-            subtitle: "Certificado médico de la clínica privada.",
-          },
-          {
-            name: "Informe médico",
-            subtitle: "Informe detallado de la condición y tratamiento.",
-          },
-          {
-            name: "Descanso prolongado",
-            subtitle:
-              "Documento que acredita descanso médico superior a 15 días.",
-          },
-        ],
-      },
+          { name: "Certificado Médico", subtitle: "De la clínica privada." },
+          { name: "Informe Médico", subtitle: "Detalle de condición y tratamiento." },
+          { name: "Descanso Prolongado", subtitle: "Acredita +15 días." }
+        ]
+      }
     };
 
     let currentOperation = null;
-    let images = []; // { dataUrl, index }
+    let images = []; 
 
+    // --- EVENT LISTENER: SELECT ---
     operationSelect.addEventListener("change", () => {
       const value = operationSelect.value;
       currentOperation = OPERATIONS[value] || null;
@@ -656,95 +346,50 @@
       zonesContainer.innerHTML = "";
 
       if (!currentOperation) {
+        dynamicContent.style.display = "none";
+        emptyState.style.display = "block";
         generateBtn.disabled = true;
         return;
       }
 
+      emptyState.style.display = "none";
+      dynamicContent.style.display = "block";
+
+      // Generar tarjetas
       currentOperation.documents.forEach((doc, index) => {
-        const zoneCard = document.createElement("div");
-        zoneCard.className = "zone-card";
-        zoneCard.dataset.index = index;
+        const card = document.createElement("div");
+        card.className = "upload-card";
+        card.dataset.index = index;
+        card.style.animationDelay = `${index * 0.1}s`;
 
-        const zoneHeader = document.createElement("div");
-        zoneHeader.className = "zone-header";
-
-        const zoneName = document.createElement("div");
-        zoneName.className = "zone-name";
-        zoneName.textContent = `${index + 1}. ${doc.name}`;
-
-        const status = document.createElement("div");
-        status.className = "zone-status pending";
-        status.innerHTML =
-          '<span class="zone-status-dot"></span><span>Pendiente</span>';
-
-        zoneHeader.appendChild(zoneName);
-        zoneHeader.appendChild(status);
-
-        const dropZone = document.createElement("div");
-        dropZone.className = "drop-zone";
-
-        const content = document.createElement("div");
-        content.className = "drop-zone-content";
-        content.innerHTML = `
-          <div class="drop-zone-icon">📷</div>
-          <div><strong>Toca para subir o tomar foto</strong></div>
-          <div class="drop-zone-hint">También puedes arrastrar una imagen aquí (en PC).</div>
+        // Estructura HTML de la tarjeta
+        card.innerHTML = `
+          <div class="upload-area">
+            <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span class="upload-label">Subir foto</span>
+            <span class="upload-sub">Clic para capturar</span>
+          </div>
+          <div class="card-footer-info">
+            <span class="doc-name">${index + 1}. ${doc.name}</span>
+            <span class="doc-desc">${doc.subtitle}</span>
+          </div>
         `;
-        dropZone.appendChild(content);
 
-        const subtitle = document.createElement("div");
-        subtitle.className = "zone-subtitle";
-        subtitle.textContent = doc.subtitle || "Documento requerido.";
+        zonesContainer.appendChild(card);
 
-        const actions = document.createElement("div");
-        actions.className = "zone-actions";
-        const reTakeBtn = document.createElement("button");
-        reTakeBtn.className = "link-button";
-        reTakeBtn.textContent = "Cambiar foto";
-        reTakeBtn.style.display = "none";
-        actions.appendChild(reTakeBtn);
-
-        zoneCard.appendChild(zoneHeader);
-        zoneCard.appendChild(dropZone);
-        zoneCard.appendChild(subtitle);
-        zoneCard.appendChild(actions);
-
-        zonesContainer.appendChild(zoneCard);
-
-        // eventos
-        const openFileSelector = () => {
+        // Click event para subir archivo
+        const uploadArea = card.querySelector(".upload-area");
+        uploadArea.addEventListener("click", () => {
           hiddenFileInput.value = "";
           hiddenFileInput.dataset.targetIndex = index;
           hiddenFileInput.click();
-        };
-
-        dropZone.addEventListener("click", openFileSelector);
-        reTakeBtn.addEventListener("click", openFileSelector);
-
-        dropZone.addEventListener("dragover", (ev) => {
-          ev.preventDefault();
-          dropZone.classList.add("dragover");
-        });
-
-        dropZone.addEventListener("dragleave", () => {
-          dropZone.classList.remove("dragover");
-        });
-
-        dropZone.addEventListener("drop", (ev) => {
-          ev.preventDefault();
-          dropZone.classList.remove("dragover");
-          const file = ev.dataTransfer.files[0];
-          if (file && file.type.startsWith("image/")) {
-            handleImageFile(file, index);
-          } else {
-            alert("Por favor, arrastra solo archivos de imagen.");
-          }
         });
       });
 
       updateGenerateButtonState();
     });
 
+    // --- EVENT LISTENER: INPUT FILE ---
     hiddenFileInput.addEventListener("change", (ev) => {
       const file = ev.target.files[0];
       const index = parseInt(hiddenFileInput.dataset.targetIndex, 10);
@@ -753,38 +398,103 @@
       }
     });
 
-    function handleImageFile(file, index) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const dataUrl = event.target.result;
-        images[index] = { dataUrl, index };
+    // --- LÓGICA DE VALIDACIÓN (TESSERACT OCR) ---
+    async function validarDocumento(file, cardElement) {
+      const uploadArea = cardElement.querySelector(".upload-area");
+      const originalContent = uploadArea.innerHTML;
 
-        const zoneCard = zonesContainer.querySelector(
-          `.zone-card[data-index="${index}"]`
+      // 1. UI: Mostrar Loader
+      uploadArea.innerHTML = `
+        <div class="loader" style="color:#bed000; border-color: #004724;"></div>
+        <span style="font-size:0.75rem; margin-top:8px; color:#6B7280; font-weight:500;">Validando...</span>
+      `;
+
+      try {
+        // 2. OCR: Analizar imagen (usa 'spa' para español)
+        // Nota: La primera vez descargará datos del idioma, puede tardar un poco.
+        const result = await Tesseract.recognize(
+          file, 
+          'spa', 
+          // { logger: m => console.log(m) } // Descomentar para debug en consola
         );
-        if (!zoneCard) return;
 
-        const dropZone = zoneCard.querySelector(".drop-zone");
-        const status = zoneCard.querySelector(".zone-status");
-        const reTakeBtn = zoneCard.querySelector(".link-button");
+        const textoDetectado = result.data.text.trim();
+        const confianza = result.data.confidence;
 
-        dropZone.innerHTML = "";
-        const imgEl = document.createElement("img");
-        imgEl.src = dataUrl;
-        imgEl.className = "preview-img";
-        dropZone.appendChild(imgEl);
+        console.log("OCR Texto:", textoDetectado.length, "caracteres");
+        console.log("OCR Confianza:", confianza);
 
-        status.classList.remove("pending");
-        status.classList.add("done");
-        status.innerHTML =
-          '<span class="zone-status-dot"></span><span>Completado</span>';
+        // 3. REGLA DE NEGOCIO
+        // Si tiene muy poco texto (<15 caracteres) probablemente no sea un documento válido
+        if (textoDetectado.length > 15) {
+          return true; // Pasa la prueba
+        } else {
+          alert("⚠️ No detectamos texto legible en la imagen.\n\nPor favor, asegúrate de que sea un documento y que la foto no esté borrosa.");
+          uploadArea.innerHTML = originalContent; // Restaurar estado inicial
+          return false;
+        }
 
-        zoneCard.classList.add("completed");
-        if (reTakeBtn) reTakeBtn.style.display = "inline";
+      } catch (error) {
+        console.error("Error OCR:", error);
+        alert("Ocurrió un error al procesar la imagen. Inténtalo de nuevo.");
+        uploadArea.innerHTML = originalContent;
+        return false;
+      }
+    }
 
-        updateGenerateButtonState();
-      };
-      reader.readAsDataURL(file);
+    // --- MANEJO DE IMAGEN ---
+    async function handleImageFile(file, index) {
+      const card = zonesContainer.querySelector(`.upload-card[data-index="${index}"]`);
+      if (!card) return;
+
+      // Paso 1: Validar
+      const esValido = await validarDocumento(file, card);
+
+      if (esValido) {
+        // Paso 2: Si es válido, mostrar preview
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const dataUrl = event.target.result;
+          images[index] = { dataUrl, index };
+          updateCardVisuals(index, dataUrl);
+          updateGenerateButtonState();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function updateCardVisuals(index, dataUrl) {
+      const card = zonesContainer.querySelector(`.upload-card[data-index="${index}"]`);
+      const uploadArea = card.querySelector(".upload-area");
+      
+      uploadArea.innerHTML = ""; // Limpiar loader o icono
+
+      // Crear elementos visuales
+      const img = document.createElement("img");
+      img.src = dataUrl;
+      img.className = "preview-img";
+
+      const badge = document.createElement("div");
+      badge.className = "success-badge";
+      badge.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>`;
+
+      const editOverlay = document.createElement("div");
+      editOverlay.className = "edit-overlay";
+      editOverlay.textContent = "Cambiar foto";
+      
+      // Permitir cambiar foto al hacer click de nuevo
+      editOverlay.addEventListener("click", (e) => {
+        e.stopPropagation();
+        hiddenFileInput.value = "";
+        hiddenFileInput.dataset.targetIndex = index;
+        hiddenFileInput.click();
+      });
+
+      uploadArea.appendChild(img);
+      uploadArea.appendChild(badge);
+      uploadArea.appendChild(editOverlay);
+      
+      card.classList.add("completed");
     }
 
     function updateGenerateButtonState() {
@@ -792,16 +502,13 @@
         generateBtn.disabled = true;
         return;
       }
-
       const totalDocs = currentOperation.documents.length;
-      const allComplete =
-        images.length === totalDocs &&
-        images.every((img) => img && typeof img.dataUrl === "string");
-
+      // Verificar que tengamos todas las imagenes
+      const allComplete = images.length === totalDocs && images.every(img => img && img.dataUrl);
       generateBtn.disabled = !allComplete;
     }
 
-    // carga de imagen (para jsPDF)
+    // --- GENERAR PDF ---
     function loadImage(dataUrl) {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -812,28 +519,14 @@
     }
 
     generateBtn.addEventListener("click", async () => {
-      if (!currentOperation) return;
-      const totalDocs = currentOperation.documents.length;
-      if (
-        images.length !== totalDocs ||
-        images.some((img) => !img || !img.dataUrl)
-      ) {
-        alert("Completa todos los documentos antes de generar el PDF.");
-        return;
-      }
-
       try {
         generateBtn.disabled = true;
-        generateBtn.innerHTML =
-          '<span class="spinner"></span><span>Generando PDF...</span>';
+        const originalText = generateBtn.innerHTML;
+        generateBtn.innerHTML = `<div class="loader" style="width:14px; height:14px; border-color:white; border-top-color:transparent;"></div><span> Procesando...</span>`;
 
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({
-          orientation: "portrait",
-          unit: "mm",
-          format: "a4",
-        });
-
+        const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 10;
@@ -843,29 +536,30 @@
 
         for (const item of orderedImages) {
           const imgEl = await loadImage(item.dataUrl);
-          const availableWidth = pageWidth - 2 * margin;
+          const availableWidth = pageWidth - (2 * margin);
           const ratio = imgEl.height / imgEl.width;
-          const imgWidth = availableWidth;
-          const imgHeight = imgWidth * ratio;
+          let imgHeight = availableWidth * ratio;
+          
+          // Ajuste simple si la imagen es muy alta para una pagina
+          if (imgHeight > (pageHeight - 20)) {
+             imgHeight = pageHeight - 40; 
+          }
 
           if (yPosition + imgHeight > pageHeight - margin) {
             doc.addPage();
             yPosition = margin;
           }
-
-          doc.addImage(item.dataUrl, "JPEG", margin, yPosition, imgWidth, imgHeight);
-          yPosition += imgHeight + 6;
+          
+          doc.addImage(item.dataUrl, "JPEG", margin, yPosition, availableWidth, imgHeight);
+          yPosition += imgHeight + 10;
         }
 
-        const fileName = `Subsidios_${currentOperation.label}.pdf`;
-        doc.save(fileName);
-
-        generateBtn.innerHTML = "<span>Generar PDF combinado</span>";
+        doc.save(`Subsidios_${currentOperation.label}.pdf`);
+        generateBtn.innerHTML = originalText;
+        
       } catch (err) {
         console.error(err);
-        alert("Ocurrió un error al generar el PDF. Intenta nuevamente.");
-        generateBtn.innerHTML = "<span>Generar PDF combinado</span>";
-      } finally {
+        alert("Error al generar el PDF.");
         updateGenerateButtonState();
       }
     });
