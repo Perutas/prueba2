@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+  <title>Subsidios por descanso médico – Falabella</title>
+  <meta name="theme-color" content="#C6D420" />
+
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    /* ============================
+       PALETA FALABELLA (Brandbook)
+       ============================ */
+    :root {
+      /* Verde Falabella principal */
+      --falabella-green: #c6d420;
+      /* Verde intermedio / oscuro */
+      --green-mid: #026826;
+      --green-dark: #013f16;
+
+      /* Magenta ofertas / llamados */
+      --magenta: #f73eab;
+
+      /* Apoyos neutros */
+      --bg-soft: #f3f4f6;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background:
+        radial-gradient(circle at top left, #e0f2fe 0, transparent 45%),
+        radial-gradient(circle at top right, #d9f99d 0, transparent 55%),
+        var(--bg-soft);
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 980px;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      grid-template-columns: 8px minmax(0, 1fr);
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    /* Barra vertical tipo “f” de Falabella */
+    .brand-bar {
+      background: linear-gradient(
+        180deg,
+        var(--falabella-green),
+        var(--green-mid)
+      );
+    }
+
+    .app-main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    .app-header {
+      background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+      color: #fff;
+      padding: 16px 20px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      align-items: center;
+    }
+
+    .header-left {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .app-title {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-pill {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .app-subtitle {
+      margin: 4px 0 0;
+      font-size: 0.82rem;
+      opacity: 0.95;
+    }
+
+    .steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 0.78rem;
+    }
+
+    .step-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.18);
+      white-space: nowrap;
+    }
+
+    .step-number {
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--falabella-green);
+      color: #111827;
+      font-weight: 700;
+    }
+
+    /* CUERPO */
+    .app-body {
+      padding: 18px 18px 20px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      .app-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 14px 14px 16px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-badge {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: rgba(198, 212, 32, 0.18);
+      color: var(--green-dark);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .panel-subtext {
+      margin: 2px 0 0;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      background: rgba(247, 62, 171, 0.12);
+      color: var(--magenta);
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--magenta);
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      outline: none;
+      transition: box-shadow 0.15s, border-color 0.15s, background 0.15s;
+    }
+
+    select:focus {
+      border-color: var(--falabella-green);
+      box-shadow: 0 0 0 1px rgba(198, 212, 32, 0.6);
+      background: #ffffff;
+    }
+
+    /* ZONAS */
+    .zones-grid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .zone-card {
+      border-radius: var(--radius-md);
+      border: 1px dashed #d1d5db;
+      background: #f9fafb;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.1s,
+        background 0.2s;
+    }
+
+    .zone-card.completed {
+      border-style: solid;
+      border-color: var(--green-mid);
+      background: #ecfdf3;
+      box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.4);
+    }
+
+    .zone-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78rem;
+    }
+
+    .zone-name {
+      font-weight: 600;
+      color: var(--green-dark);
+    }
+
+    .zone-status {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .zone-status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    .zone-status.pending {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .zone-status.done {
+      background: #ecfdf5;
+      color: #15803d;
+    }
+
+    .drop-zone {
+      position: relative;
+      border-radius: 10px;
+      border: 1px dashed rgba(19, 78, 74, 0.3);
+      background: #e5f5d6;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 130px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color 0.2s, background 0.2s, transform 0.08s;
+    }
+
+    .drop-zone:hover {
+      border-color: var(--falabella-green);
+      background: #d9f99d;
+      transform: translateY(-1px);
+    }
+
+    .drop-zone.dragover {
+      border-color: var(--magenta);
+      background: #ffe4f3;
+    }
+
+    .drop-zone-content {
+      text-align: center;
+      color: #374151;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      z-index: 1;
+    }
+
+    .drop-zone-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.82);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+      font-size: 1.1rem;
+    }
+
+    .drop-zone-hint {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .preview-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .zone-subtitle {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .zone-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 2px;
+    }
+
+    .link-button {
+      border: none;
+      background: none;
+      padding: 0;
+      font-size: 0.7rem;
+      color: var(--magenta);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    /* PANEL DERECHA */
+    .info-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .info-list li span.bullet {
+      display: inline-block;
+      width: 14px;
+      text-align: center;
+    }
+
+    .footer-actions {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .primary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 14px;
+      width: 100%;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(
+        135deg,
+        var(--falabella-green),
+        var(--green-mid)
+      );
+      color: #111827;
+      font-weight: 700;
+      font-size: 0.94rem;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(2, 104, 38, 0.4);
+      transition: transform 0.08s, box-shadow 0.08s, opacity 0.1s;
+    }
+
+    .primary-btn:disabled {
+      opacity: 0.55;
+      box-shadow: none;
+      cursor: default;
+    }
+
+    .primary-btn:not(:disabled):active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 12px rgba(2, 104, 38, 0.45);
+    }
+
+    .primary-btn .spinner {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid rgba(17, 24, 39, 0.25);
+      border-top-color: #111827;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .helper-text {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .helper-text strong {
+      color: var(--green-mid);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="brand-bar"></div>
+
+    <div class="app-main">
+      <!-- HEADER -->
+      <header class="app-header">
+        <div class="header-left">
+          <h1 class="app-title">
+            <span class="title-pill">F</span>
+            Subsidios por descanso médico
+          </h1>
+          <p class="app-subtitle">
+            Herramienta interna para colaboradores Falabella: captura los documentos del subsidio, combínalos en un PDF y súbelo a tu carpeta de gestión.
+          </p>
+        </div>
+        <div class="steps">
+          <div class="step-pill">
+            <span class="step-number">1</span> Elige el tipo de subsidio
+          </div>
+          <div class="step-pill">
+            <span class="step-number">2</span> Sube / toma fotos
+          </div>
+          <div class="step-pill">
+            <span class="step-number">3</span> Genera el PDF y compártelo
+          </div>
+        </div>
+      </header>
+
+      <!-- CUERPO -->
+      <main class="app-body">
+        <!-- Panel izquierdo -->
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">
+                <span class="panel-badge">1</span>
+                Selecciona el tipo de operación
+              </div>
+              <p class="panel-subtext">
+                Esto define los documentos que tendrás que adjuntar.
+              </p>
+            </div>
+            <span class="badge">
+              <span class="badge-dot"></span> Obligatorio
+            </span>
+          </div>
+
+          <select id="operation-select">
+            <option value="">Seleccione un tipo de operación</option>
+            <option value="1">Subsidios clínica privada</option>
+            <option value="2">Subsidios hospital público</option>
+            <option value="3">Clínica privada (+15 días)</option>
+          </select>
+
+          <div style="margin-top: 14px;">
+            <div class="panel-header" style="margin-bottom: 8px;">
+              <div>
+                <div class="panel-title">
+                  <span class="panel-badge">2</span>
+                  Documentos requeridos
+                </div>
+                <p class="panel-subtext">
+                  Toca cada recuadro verde para subir una imagen o tomar una foto.
+                </p>
+              </div>
+            </div>
+
+            <div class="zones-grid" id="zones-container"></div>
+          </div>
+        </section>
+
+        <!-- Panel derecho -->
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">
+                <span class="panel-badge">ℹ</span>
+                Recomendaciones rápidas
+              </div>
+            </div>
+          </div>
+
+          <ul class="info-list">
+            <li><span class="bullet">•</span> Verifica que el texto se lea claramente (sin reflejos ni sombras fuertes).</li>
+            <li><span class="bullet">•</span> Incluye siempre el documento completo: encabezados, sellos, firmas y fechas.</li>
+            <li><span class="bullet">•</span> Puedes reemplazar una foto en cualquier momento con “Cambiar foto”.</li>
+            <li><span class="bullet">•</span> Una vez descargado el PDF, súbelo a <strong>Google Drive / carpeta de Subsidios</strong> según el flujo interno.</li>
+          </ul>
+
+          <div class="footer-actions">
+            <button id="generate-btn" class="primary-btn" disabled>
+              <span>Generar PDF combinado</span>
+            </button>
+            <p class="helper-text">
+              El botón se activará cuando todos los documentos estén
+              <strong>completos</strong> ✅.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Input de archivo oculto (para móvil / desktop) -->
+  <input type="file" id="hidden-file-input" accept="image/*" capture="environment" />
+
+  <script>
+    const operationSelect = document.getElementById("operation-select");
+    const zonesContainer = document.getElementById("zones-container");
+    const generateBtn = document.getElementById("generate-btn");
+    const hiddenFileInput = document.getElementById("hidden-file-input");
+
+    // Configuración según tipo de operación
+    const OPERATIONS = {
+      "1": {
+        label: "Subsidios_clinica_privada",
+        documents: [
+          {
+            name: "Certificado médico",
+            subtitle: "Certificado médico emitido por la clínica privada.",
+          },
+        ],
+      },
+      "2": {
+        label: "Subsidios_hospital_publico",
+        documents: [
+          {
+            name: "Certificado médico",
+            subtitle: "Certificado médico emitido por el hospital público.",
+          },
+          {
+            name: "Comprobante",
+            subtitle: "Comprobante de atención o pago relacionado.",
+          },
+        ],
+      },
+      "3": {
+        label: "Clinica_privada_+15_dias",
+        documents: [
+          {
+            name: "Certificado médico",
+            subtitle: "Certificado médico de la clínica privada.",
+          },
+          {
+            name: "Informe médico",
+            subtitle: "Informe detallado de la condición y tratamiento.",
+          },
+          {
+            name: "Descanso prolongado",
+            subtitle:
+              "Documento que acredita descanso médico superior a 15 días.",
+          },
+        ],
+      },
+    };
+
+    let currentOperation = null;
+    let images = []; // { dataUrl, index }
+
+    operationSelect.addEventListener("change", () => {
+      const value = operationSelect.value;
+      currentOperation = OPERATIONS[value] || null;
+      images = [];
+      zonesContainer.innerHTML = "";
+
+      if (!currentOperation) {
+        generateBtn.disabled = true;
+        return;
+      }
+
+      currentOperation.documents.forEach((doc, index) => {
+        const zoneCard = document.createElement("div");
+        zoneCard.className = "zone-card";
+        zoneCard.dataset.index = index;
+
+        const zoneHeader = document.createElement("div");
+        zoneHeader.className = "zone-header";
+
+        const zoneName = document.createElement("div");
+        zoneName.className = "zone-name";
+        zoneName.textContent = `${index + 1}. ${doc.name}`;
+
+        const status = document.createElement("div");
+        status.className = "zone-status pending";
+        status.innerHTML =
+          '<span class="zone-status-dot"></span><span>Pendiente</span>';
+
+        zoneHeader.appendChild(zoneName);
+        zoneHeader.appendChild(status);
+
+        const dropZone = document.createElement("div");
+        dropZone.className = "drop-zone";
+
+        const content = document.createElement("div");
+        content.className = "drop-zone-content";
+        content.innerHTML = `
+          <div class="drop-zone-icon">📷</div>
+          <div><strong>Toca para subir o tomar foto</strong></div>
+          <div class="drop-zone-hint">También puedes arrastrar una imagen aquí (en PC).</div>
+        `;
+        dropZone.appendChild(content);
+
+        const subtitle = document.createElement("div");
+        subtitle.className = "zone-subtitle";
+        subtitle.textContent = doc.subtitle || "Documento requerido.";
+
+        const actions = document.createElement("div");
+        actions.className = "zone-actions";
+        const reTakeBtn = document.createElement("button");
+        reTakeBtn.className = "link-button";
+        reTakeBtn.textContent = "Cambiar foto";
+        reTakeBtn.style.display = "none";
+        actions.appendChild(reTakeBtn);
+
+        zoneCard.appendChild(zoneHeader);
+        zoneCard.appendChild(dropZone);
+        zoneCard.appendChild(subtitle);
+        zoneCard.appendChild(actions);
+
+        zonesContainer.appendChild(zoneCard);
+
+        // eventos
+        const openFileSelector = () => {
+          hiddenFileInput.value = "";
+          hiddenFileInput.dataset.targetIndex = index;
+          hiddenFileInput.click();
+        };
+
+        dropZone.addEventListener("click", openFileSelector);
+        reTakeBtn.addEventListener("click", openFileSelector);
+
+        dropZone.addEventListener("dragover", (ev) => {
+          ev.preventDefault();
+          dropZone.classList.add("dragover");
+        });
+
+        dropZone.addEventListener("dragleave", () => {
+          dropZone.classList.remove("dragover");
+        });
+
+        dropZone.addEventListener("drop", (ev) => {
+          ev.preventDefault();
+          dropZone.classList.remove("dragover");
+          const file = ev.dataTransfer.files[0];
+          if (file && file.type.startsWith("image/")) {
+            handleImageFile(file, index);
+          } else {
+            alert("Por favor, arrastra solo archivos de imagen.");
+          }
+        });
+      });
+
+      updateGenerateButtonState();
+    });
+
+    hiddenFileInput.addEventListener("change", (ev) => {
+      const file = ev.target.files[0];
+      const index = parseInt(hiddenFileInput.dataset.targetIndex, 10);
+      if (file && file.type.startsWith("image/")) {
+        handleImageFile(file, index);
+      }
+    });
+
+    function handleImageFile(file, index) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target.result;
+        images[index] = { dataUrl, index };
+
+        const zoneCard = zonesContainer.querySelector(
+          `.zone-card[data-index="${index}"]`
+        );
+        if (!zoneCard) return;
+
+        const dropZone = zoneCard.querySelector(".drop-zone");
+        const status = zoneCard.querySelector(".zone-status");
+        const reTakeBtn = zoneCard.querySelector(".link-button");
+
+        dropZone.innerHTML = "";
+        const imgEl = document.createElement("img");
+        imgEl.src = dataUrl;
+        imgEl.className = "preview-img";
+        dropZone.appendChild(imgEl);
+
+        status.classList.remove("pending");
+        status.classList.add("done");
+        status.innerHTML =
+          '<span class="zone-status-dot"></span><span>Completado</span>';
+
+        zoneCard.classList.add("completed");
+        if (reTakeBtn) reTakeBtn.style.display = "inline";
+
+        updateGenerateButtonState();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateGenerateButtonState() {
+      if (!currentOperation) {
+        generateBtn.disabled = true;
+        return;
+      }
+
+      const totalDocs = currentOperation.documents.length;
+      const allComplete =
+        images.length === totalDocs &&
+        images.every((img) => img && typeof img.dataUrl === "string");
+
+      generateBtn.disabled = !allComplete;
+    }
+
+    // carga de imagen (para jsPDF)
+    function loadImage(dataUrl) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = dataUrl;
+      });
+    }
+
+    generateBtn.addEventListener("click", async () => {
+      if (!currentOperation) return;
+      const totalDocs = currentOperation.documents.length;
+      if (
+        images.length !== totalDocs ||
+        images.some((img) => !img || !img.dataUrl)
+      ) {
+        alert("Completa todos los documentos antes de generar el PDF.");
+        return;
+      }
+
+      try {
+        generateBtn.disabled = true;
+        generateBtn.innerHTML =
+          '<span class="spinner"></span><span>Generando PDF...</span>';
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+          orientation: "portrait",
+          unit: "mm",
+          format: "a4",
+        });
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 10;
+        let yPosition = margin;
+
+        const orderedImages = [...images].sort((a, b) => a.index - b.index);
+
+        for (const item of orderedImages) {
+          const imgEl = await loadImage(item.dataUrl);
+          const availableWidth = pageWidth - 2 * margin;
+          const ratio = imgEl.height / imgEl.width;
+          const imgWidth = availableWidth;
+          const imgHeight = imgWidth * ratio;
+
+          if (yPosition + imgHeight > pageHeight - margin) {
+            doc.addPage();
+            yPosition = margin;
+          }
+
+          doc.addImage(item.dataUrl, "JPEG", margin, yPosition, imgWidth, imgHeight);
+          yPosition += imgHeight + 6;
+        }
+
+        const fileName = `Subsidios_${currentOperation.label}.pdf`;
+        doc.save(fileName);
+
+        generateBtn.innerHTML = "<span>Generar PDF combinado</span>";
+      } catch (err) {
+        console.error(err);
+        alert("Ocurrió un error al generar el PDF. Intenta nuevamente.");
+        generateBtn.innerHTML = "<span>Generar PDF combinado</span>";
+      } finally {
+        updateGenerateButtonState();
+      }
+    });
+  </script>
+</body>
+</html>
